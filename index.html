@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Click Anywhere to Continue</title>
+  <meta name="description" content="A cute, girly, anime gacha-style 'click anywhere to continue' screen." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pink-1: #ffe6f4;
+      --pink-2: #ffd6ec;
+      --pink-3: #ffb8e3;
+      --pink-4: #ff9fd8;
+      --pink-5: #ff83cf;
+      --bubble: rgba(255, 255, 255, 0.6);
+      --txt: #ff4da6;
+      --txt-dark: #c43a7e;
+      --shadow: 0 12px 30px rgba(255, 105, 180, 0.25);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Baloo 2", "Fredoka", system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% 15%, #ffffff 0%, #fff6fb 35%, #ffe6f4 60%, #ffd6ec 100%);
+      overflow: hidden;
+    }
+
+    /* Soft animated gradient mist */
+    .mist {
+      position: fixed; inset: -20vmax; filter: blur(60px); pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(30vmax 30vmax at 15% 25%, #ffe6f4 20%, rgba(255,192,236,.4) 60%, transparent 70%),
+        radial-gradient(28vmax 28vmax at 85% 20%, #ffe1ff 10%, rgba(255, 145, 199, .45) 55%, transparent 70%),
+        radial-gradient(26vmax 26vmax at 30% 85%, #ffe0ef 15%, rgba(255, 196, 232, .5) 60%, transparent 72%),
+        radial-gradient(24vmax 24vmax at 85% 78%, #ffeef8 10%, rgba(255, 214, 238, .55) 60%, transparent 75%);
+      animation: drift 18s ease-in-out infinite alternate;
+      opacity: .9;
+    }
+    @keyframes drift { to { transform: translate3d(2vmax, -2vmax, 0) scale(1.02); } }
+
+    /* Subtle glossy highlight sweep */
+    .gloss {
+      position: fixed; inset: 0; pointer-events: none; z-index: 2;
+      background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.18) 50%, transparent 65%);
+      background-size: 200% 200%;
+      animation: sweep 6s ease-in-out infinite;
+      mix-blend-mode: screen; opacity: .8;
+    }
+    @keyframes sweep { 0% { background-position: -120% -120%; } 60% { background-position: 120% 120%; } 100% { background-position: 120% 120%; }}
+
+    /* Floating kawaii shapes */
+    .floaters { position: fixed; inset: 0; overflow: hidden; z-index: 1; pointer-events: none; }
+    .floater {
+      position: absolute; width: 22px; height: 22px; opacity: .75; filter: drop-shadow(0 4px 10px rgba(255,105,180,.25));
+      animation: floatUp calc(7s + (var(--i) * .35s)) linear infinite;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(12vh) translateX(0) scale(.85) rotate(0); opacity: 0; }
+      10% { opacity: .8; }
+      100% { transform: translateY(-110vh) translateX(calc((var(--i) - 10) * 1.2vmin)) rotate(360deg) scale(1.1); opacity: 0; }
+    }
+    .floater.heart { background: radial-gradient(circle at 30% 30%, #fff 0 30%, transparent 32%),
+                                     radial-gradient(circle at 70% 30%, #fff 0 30%, transparent 32%),
+                                     radial-gradient(closest-side, var(--pink-4) 0 98%, transparent 100%);
+      clip-path: path("M11 3 C9 0 4 0 2.2 2.3 C-1 6 2 11 11 18 C20 11 23 6 19.8 2.3 C18 0 13 0 11 3 Z");
+    }
+    .floater.star { background: radial-gradient(circle at 50% 30%, #fff 0 25%, transparent 27%), linear-gradient(var(--pink-3), var(--pink-5));
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    }
+    .floater.sparkle { width: 16px; height: 16px; background: radial-gradient(circle, #fff 0 40%, transparent 42%);
+      box-shadow: 0 0 14px 4px rgba(255,255,255,.7);
+      border-radius: 50%;
+      animation-duration: calc(5.5s + (var(--i) * .25s));
+    }
+
+    /* Center card */
+    .center {
+      position: fixed; inset: 0; display: grid; place-items: center; z-index: 3;
+      padding: 24px;
+    }
+    .card {
+      position: relative; width: min(780px, 92vw);
+      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.85));
+      border-radius: 28px; padding: 42px 28px; text-align: center; box-shadow: var(--shadow);
+      backdrop-filter: blur(6px) saturate(120%);
+      border: 2px solid rgba(255, 167, 211, .55);
+      outline: 6px solid rgba(255, 167, 211, .2);
+      transition: transform .45s ease, box-shadow .45s ease, outline-color .45s ease;
+    }
+    .card:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 18px 46px rgba(255,105,180,.28); outline-color: rgba(255, 167, 211, .35); }
+
+    .badge {
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(90deg, var(--pink-3), var(--pink-5));
+      color: white; padding: 8px 16px; border-radius: 999px; font-size: 14px; letter-spacing: .6px;
+      box-shadow: 0 8px 18px rgba(255,105,180,.35);
+    }
+
+    .title {
+      font-size: clamp(28px, 4.6vw, 54px);
+      line-height: 1.05; margin: 6px 0 10px; color: var(--txt);
+      text-shadow: 0 2px 0 rgba(255,255,255,.9), 0 10px 18px rgba(255,105,180,.25);
+      letter-spacing: .4px;
+    }
+    .subtitle {
+      margin: 0 auto 10px; max-width: 36ch; color: var(--txt-dark); font-size: clamp(16px, 2.5vw, 20px);
+      opacity: .9;
+    }
+
+    /* Kawaii face */
+    .kawaii {
+      margin: 18px auto 8px; display: inline-grid; grid-auto-flow: column; gap: 28px; align-items: center; padding: 10px 16px;
+      border-radius: 999px; background: rgba(255, 217, 239, .6); box-shadow: inset 0 -6px 14px rgba(255,105,180,.15);
+      transform: translateZ(0);
+    }
+    .eye { width: 18px; height: 18px; background: radial-gradient(circle at 40% 40%, #fff 0 32%, transparent 34%), #2a0d1b; border-radius: 50%; box-shadow: 0 4px 0 rgba(0,0,0,.04); animation: blink 6s infinite; }
+    @keyframes blink { 0%, 4%, 100% { transform: scaleY(1); } 2% { transform: scaleY(.08); } }
+    .mouth { width: 28px; height: 18px; border: 4px solid #2a0d1b; border-top: transparent; border-radius: 0 0 22px 22px; margin-top: 2px; }
+
+    .hint {
+      margin-top: 18px; font-size: 14px; color: #b85797; opacity: .9; letter-spacing: .2px;
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 8px 14px; border-radius: 999px; background: rgba(255, 210, 234, .6);
+      box-shadow: inset 0 -6px 12px rgba(255,105,180,.08);
+    }
+    .bouncy { display: inline-block; animation: bouncy 1.8s ease-in-out infinite; transform-origin: 50% 100%; }
+    @keyframes bouncy { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
+
+    /* Click ripple */
+    .ripple {
+      position: fixed; pointer-events: none; width: 20px; height: 20px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,.9), rgba(255,255,255,0));
+      transform: translate(-50%, -50%); opacity: .9; z-index: 4; animation: ripple .8s ease-out forwards;
+      box-shadow: 0 0 0 8px rgba(255, 151, 203, .35), 0 0 0 18px rgba(255, 151, 203, .18);
+    }
+    @keyframes ripple { to { width: 240px; height: 240px; opacity: 0; } }
+
+    /* Click burst particles */
+    .particle {
+      position: fixed; width: 10px; height: 10px; border-radius: 50%; pointer-events: none; z-index: 5; opacity: 0;
+      background: radial-gradient(circle at 40% 40%, #fff 0 35%, transparent 36%),
+                  radial-gradient(circle at 60% 40%, #fff 0 35%, transparent 36%),
+                  radial-gradient(closest-side, var(--pink-5) 0 98%, transparent 100%);
+      clip-path: path("M5 1.6 C4.2 0 2 0 1.1 1.2 C-0.5 3.2 1 5.8 5 9 C9 5.8 10.5 3.2 8.9 1.2 C8 0 5.8 0 5 1.6 Z");
+      animation: burst 700ms ease-out forwards;
+    }
+    @keyframes burst { 0% { transform: translate(-50%, -50%) scale(.6) rotate(0); opacity: .9; } 100% { transform: translate(var(--dx), var(--dy)) scale(1.1) rotate(360deg); opacity: 0; } }
+
+    /* Footer note */
+    .footer { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #b86aa1; opacity: .8; z-index: 3; text-align: center; width: max-content; max-width: 90vw; }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 30px 20px;
+      }
+      .footer {
+        font-size: 10px;
+        bottom: 8px;
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .mist, .gloss, .floater, .eye, .bouncy, .ripple, .particle { animation: none !important; }
+    }
+  </style>
+
+  <style>
+    .cursor-sparkle {
+      position: fixed;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff 0%, #ffb6e6 60%, transparent 100%);
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(1);
+      animation: sparkleFade 0.7s ease-out forwards;
+      z-index: 9999;
+      filter: drop-shadow(0 0 6px rgba(255, 150, 220, .7));
+    }
+
+    @keyframes sparkleFade {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(2.5); }
+    }
+  </style> 
+
+  <style>
+    /* Balloon/Bubble celebration */
+    .cele-balloon {
+      position: fixed;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff 0%, #ff8adf 40%, #ff4dc4 70%, transparent 100%);
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      animation: popFloat 1.5s ease-out forwards;
+      animation-delay: var(--delay);
+      filter: drop-shadow(0 0 8px rgba(255, 140, 220, 0.6));
+    }
+
+    @keyframes popFloat {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(0.7); }
+      30% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.2); opacity: 1; }
+      70% { opacity: 0.8; }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0); }
+    }
+
+    /* Closing overlay */
+    .closing-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #ffe6f4, #ffd6ec, #ffb8e3);
+      animation: closeOpen 1.2s ease forwards;
+      z-index: 10000;
+    }
+
+    @keyframes closeOpen {
+      0% { transform: scale(0); opacity: 0; border-radius: 50%; }
+      40% { transform: scale(1.2); opacity: 1; border-radius: 0; }
+      70% { transform: scale(1); }
+      100% { opacity: 1; }
+    }
+  </style>
+
+  
+</head>
+<body>
+  <div class="mist" aria-hidden="true"></div>
+  <div class="gloss" aria-hidden="true"></div>
+  <div class="floaters" aria-hidden="true">
+    <!-- 24 floaters with varied types and speeds -->
+    <div class="floater heart" style="--i:1; left:6%; bottom:-10%;"></div>
+    <div class="floater star" style="--i:2; left:15%; bottom:-8%;"></div>
+    <div class="floater sparkle" style="--i:3; left:24%; bottom:-6%;"></div>
+    <div class="floater heart" style="--i:4; left:32%; bottom:-12%;"></div>
+    <div class="floater star" style="--i:5; left:40%; bottom:-9%;"></div>
+    <div class="floater sparkle" style="--i:6; left:50%; bottom:-11%;"></div>
+    <div class="floater heart" style="--i:7; left:58%; bottom:-7%;"></div>
+    <div class="floater star" style="--i:8; left:66%; bottom:-10%;"></div>
+    <div class="floater sparkle" style="--i:9; left:74%; bottom:-12%;"></div>
+    <div class="floater heart" style="--i:10; left:82%; bottom:-9%;"></div>
+    <div class="floater star" style="--i:11; left:90%; bottom:-8%;"></div>
+    <div class="floater sparkle" style="--i:12; left:4%; bottom:-7%;"></div>
+    <div class="floater heart" style="--i:13; left:12%; bottom:-10%;"></div>
+    <div class="floater star" style="--i:14; left:22%; bottom:-9%;"></div>
+    <div class="floater sparkle" style="--i:15; left:34%; bottom:-11%;"></div>
+    <div class="floater heart" style="--i:16; left:46%; bottom:-8%;"></div>
+    <div class="floater star" style="--i:17; left:56%; bottom:-12%;"></div>
+    <div class="floater sparkle" style="--i:18; left:68%; bottom:-9%;"></div>
+    <div class="floater heart" style="--i:19; left:78%; bottom:-11%;"></div>
+    <div class="floater star" style="--i:20; left:88%; bottom:-10%;"></div>
+    <div class="floater sparkle" style="--i:21; left:27%; bottom:-12%;"></div>
+    <div class="floater heart" style="--i:22; left:71%; bottom:-10%;"></div>
+    <div class="floater star" style="--i:23; left:9%; bottom:-11%;"></div>
+    <div class="floater sparkle" style="--i:24; left:95%; bottom:-10%;"></div>
+  </div>
+
+  <main class="center" id="click-area" aria-label="Click anywhere to continue">
+    <article class="card" role="button" tabindex="0" aria-pressed="false" aria-describedby="cta-sub">
+      <div class="badge">Welcome, Kavya :3 ✦</div>
+      <h1 class="title">Click anywhere to continue</h1>
+      <p id="cta-sub" class="subtitle">Tap, click, or press <strong>Enter</strong>. Something's been waiting for you to look up ˶ᵔ ᵕ ᵔ˶</p>
+      <div class="kawaii" aria-hidden="true">
+        <div class="eye"></div>
+        <div class="mouth"></div>
+        <div class="eye"></div>
+      </div>
+      <div class="hint"><span class="bouncy">✦</span>I recommend continuing in laptop :)<span class="bouncy">✦</span></div>
+    </article>
+  </main>
+
+  <!-- Floating Music Toggle -->
+  <button id="musicToggle" class="music-toggle hidden">🔊</button>
+
+  <audio id="bgMusic" loop>
+    <source src="sugarcrash.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="footer">made for your childhood self (gaccha fangirl) :3 </div>
+
+  <!-- Cute Right-Click Popup -->
+<div id="rightClickPopup" style="
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 182, 193, 0.95);
+  color: #000;
+  font-family: 'Signika', sans-serif;
+  padding: 20px clamp(15px, 5vw, 40px);
+  border-radius: 20px;
+  font-size: clamp(16px, 4.5vw, 20px);
+  box-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
+  text-align: center;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  width: min(320px, 90vw);
+">
+  🚫 No peeking! Enjoy the surprise 🎉
+</div>
+
+<script>
+// Disable Right-Click with Cute Popup
+document.addEventListener('contextmenu', function (event) {
+  event.preventDefault();
+  const popup = document.getElementById('rightClickPopup');
+  popup.style.display = 'block';
+  setTimeout(() => popup.style.opacity = '1', 10);
+
+  // Fade out after 2 seconds
+  setTimeout(() => {
+    popup.style.opacity = '0';
+    setTimeout(() => popup.style.display = 'none', 500);
+  }, 2000);
+});
+</script>
+
+  <script>
+    const clickArea = document.getElementById('click-area');
+
+    function ripple(x, y) {
+      const r = document.createElement('div');
+      r.className = 'ripple';
+      r.style.left = x + 'px';
+      r.style.top = y + 'px';
+      document.body.appendChild(r);
+      r.addEventListener('animationend', () => r.remove());
+    }
+
+    function burst(x, y) {
+      const count = 20 + Math.floor(Math.random() * 10);
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        const angle = (Math.PI * 2) * (i / count) + (Math.random() * 0.6 - 0.3);
+        const distance = 70 + Math.random() * 60;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        p.style.setProperty('--dx', dx + 'px');
+        p.style.setProperty('--dy', dy + 'px');
+        document.body.appendChild(p);
+        p.addEventListener('animationend', () => p.remove());
+      }
+    }
+
+    function proceed() {
+      // nice little scale + glow
+      const card = document.querySelector('.card');
+      card.style.transition = 'transform .5s ease, opacity .6s ease';
+      card.style.transform = 'translateY(-6px) scale(1.02)';
+      card.style.opacity = '0.0';
+      setTimeout(() => {
+        window.location.href = 'main.html';
+      }, 800);
+    }
+
+    function handleActivate(e) {
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) || window.innerWidth / 2;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) || window.innerHeight / 2;
+      ripple(x, y);
+      burst(x, y);
+      proceed();
+    }
+
+    // Click / Touch anywhere
+    document.addEventListener('click', handleActivate, { passive: true });
+    document.addEventListener('touchstart', handleActivate, { passive: true });
+
+    // Keyboard accessibility
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        handleActivate(e);
+      }
+    });
+
+    // Prevent text selection on double tap/click
+    document.addEventListener('selectstart', (e) => e.preventDefault());
+
+    // Focus ring for keyboard users
+    const card = document.querySelector('.card');
+    card.addEventListener('focus', () => card.style.outline = '6px solid rgba(255, 167, 211, .5)');
+    card.addEventListener('blur', () => card.style.outline = '6px solid rgba(255, 167, 211, .2)');
+  </script>
+
+  <script>
+    // Cursor Trail - bubbly/magical sparkles ✨
+    let lastX = 0, lastY = 0, isMoving = false;
+
+    function spawnSparkle(x, y) {
+      const s = document.createElement("div");
+      s.className = "cursor-sparkle";
+      s.style.left = x + "px";
+      s.style.top = y + "px";
+      document.body.appendChild(s);
+      s.addEventListener("animationend", () => s.remove());
+    }
+
+    document.addEventListener("mousemove", (e) => {
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > 4) { // only trigger when moving
+        isMoving = true;
+        spawnSparkle(e.clientX, e.clientY);
+      }
+      lastX = e.clientX;
+      lastY = e.clientY;
+    });
+
+    // stop trail if no movement for 200ms
+    let stopTimer;
+    document.addEventListener("mousemove", () => {
+      clearTimeout(stopTimer);
+      stopTimer = setTimeout(() => isMoving = false, 200);
+    });
+  </script>
+  <script>
+    function celebrationBurst() {
+      // create 60+ floating balloons/bubbles
+      const count = 60;
+      for (let i = 0; i < count; i++) {
+        const b = document.createElement("div");
+        b.className = "cele-balloon";
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * window.innerHeight;
+        b.style.left = x + "px";
+        b.style.top = y + "px";
+        b.style.setProperty("--dx", (Math.random() * 400 - 200) + "px");
+        b.style.setProperty("--dy", (Math.random() * -300 - 100) + "px");
+        b.style.setProperty("--delay", (Math.random() * 0.5) + "s");
+        document.body.appendChild(b);
+        b.addEventListener("animationend", () => b.remove());
+      }
+
+      // Closing screen animation
+      const overlay = document.createElement("div");
+      overlay.className = "closing-overlay";
+      document.body.appendChild(overlay);
+
+      overlay.addEventListener("animationend", () => {
+        window.location.href = "main.html"; // navigate after closing
+      });
+    }
+
+    // Override proceed function to add celebration
+    function proceed() {
+      celebrationBurst();
+    }
+  </script>
+
+  <script>
+    let lockTime = 10; // lock duration in seconds
+    let isLocked = true;
+
+    // Create popup
+    const popup = document.createElement("div");
+    popup.id = "wait-popup";
+    popup.style.position = "fixed";
+    popup.style.top = "50%";
+    popup.style.left = "50%";
+    popup.style.transform = "translate(-50%, -50%) scale(0.8)";
+    popup.style.background = "rgba(255, 182, 193, 0.95)";
+    popup.style.border = "3px solid white";
+    popup.style.borderRadius = "20px";
+    popup.style.padding = "20px clamp(15px, 5vw, 30px)";
+    popup.style.fontFamily = "'Comic Neue', cursive";
+    popup.style.fontSize = "clamp(16px, 4.5vw, 20px)";
+    popup.style.color = "#fff";
+    popup.style.textAlign = "center";
+    popup.style.boxShadow = "0 0 20px pink, 0 0 40px hotpink";
+    popup.style.display = "none";
+    popup.style.zIndex = "9999";
+    popup.style.transition = "all 0.3s ease";
+    popup.style.width = "min(320px, 90vw)";
+    document.body.appendChild(popup);
+
+    // countdown
+    let countdown = lockTime;
+    const timer = setInterval(() => {
+      countdown--;
+      if (countdown <= 0) {
+        isLocked = false;
+        clearInterval(timer);
+        popup.style.display = "none";
+      }
+    }, 1000);
+
+    // intercept clicks during lock
+    document.addEventListener("click", (e) => {
+      if (isLocked) {
+        e.preventDefault();
+        e.stopPropagation();
+        popup.textContent = `⏳ Please wait ${countdown} seconds to proceed clicking! ✨`;
+        popup.style.display = "block";
+        popup.style.opacity = "1";
+        popup.style.transform = "translate(-50%, -50%) scale(1)";
+        setTimeout(() => {
+          popup.style.opacity = "0";
+          popup.style.transform = "translate(-50%, -50%) scale(0.8)";
+          setTimeout(() => {
+            if (popup.style.opacity === "0") popup.style.display = "none";
+          }, 300);
+        }, 1200); // hide popup after 1.2s
+      }
+    }, true);
+  </script>
+  <!-- ===== Unified sound modal + wait-lock + music toggle (paste before </body>) ===== -->
+
+
+  
+</body>
+</html>

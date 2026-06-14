@@ -1,0 +1,204 @@
+:root {
+  --main-bg: #101928;
+  --accent: #FF805B;
+  --tile-neutral: #2d3250;
+  --tile-active: #4d8dea;
+  --tile-empty: #e3e6e7;
+  --success: #6CD872;
+  --fail: #E94F37;
+  --text-main: #f4f4f9;
+  --font: 'Segoe UI', 'Arial', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--main-bg);
+  color: var(--text-main);
+  font-family: var(--font);
+  min-height: 100vh;
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem 0 .5rem 0;
+}
+
+#game-title {
+  font-size: 1.7rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+nav {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+  margin: .8rem 0;
+}
+nav button {
+  padding: .4rem .8rem;
+  border-radius: 6px;
+  border: none;
+  background: var(--tile-neutral);
+  color: var(--text-main);
+  font-size: 1rem;
+  transition: background .2s;
+  cursor: pointer;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+nav button:hover,
+nav button:focus { background: var(--accent); outline: none; }
+
+#progress-bar-wrapper { width: 140px; }
+#progress-bar {
+  width: 100%;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#game-section {
+  background: #18273d;
+  border-radius: 12px;
+  padding: 1.6rem;
+  margin: 2rem 0;
+  min-width: 350px;
+  box-shadow: 0 3px 20px #15213777;
+}
+#grid-container {
+  display: grid;
+  gap: 7px;
+  justify-content: center;
+  margin-bottom: 1rem;
+  min-width: 180px;
+  min-height: 180px;
+}
+.tile {
+  background: var(--tile-neutral);
+  color: var(--text-main);
+  border-radius: 6px;
+  font-size: 1.22rem;
+  font-weight: 600;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 8px #0004;
+  cursor: pointer;
+  user-select: none;
+  transition: background .18s, color .12s, transform .2s;
+  touch-action: manipulation;
+}
+
+.tile.empty { background: var(--tile-empty); color: #bbb; cursor: default; }
+
+.tile.locked { background: #4b3c77; color: #cbb7ff; border: 2px double #d4bcff; cursor: not-allowed; }
+
+.tile:active { transform: scale(.94); }
+
+#objectives {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  text-align: center;
+}
+
+#controller-panel {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat-block {
+  min-width: 80px;
+  margin: 6px 16px;
+  color: var(--text-main);
+  font-size: 1.08rem;
+}
+#timer-value.time-low { color: var(--fail); font-weight: bold; }
+#moves-value.moves-low { color: var(--fail); font-weight: bold; }
+
+.modal {
+  position: fixed;
+  top: 50%; left: 50%;
+  z-index: 2000;
+  background: #222B44EE;
+  color: var(--text-main);
+  padding: 2rem 2.2rem;
+  border-radius: 14px;
+  box-shadow: 0 2px 18px #0009;
+  min-width: 260px;
+  max-width: 90vw;
+  min-height: 160px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+.modal h2 { margin-top: 0; }
+.modal button {
+  background: var(--tile-active);
+  color: #fff;
+  border: none;
+  padding: 7px 18px;
+  margin: 10px 8px 0 8px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+.modal button:hover { background: var(--accent); }
+
+.performance span {
+  display: inline-block;
+  margin: 6px 10px 0 10px;
+  font-size: 1.08rem;
+}
+
+#complete-modal { border: 3px solid var(--success); }
+#fail-modal { border: 3px solid var(--fail); }
+#complete-modal h2, #fail-modal h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+.modal.hidden { display: none; }
+
+footer {
+  text-align: center;
+  font-size: .9rem;
+  color: #bbb;
+  margin-top: 2rem;
+}
+
+@media (max-width: 800px) {
+  #game-section {
+    min-width: 0;
+    padding: .9rem;
+  }
+  #grid-container {
+    min-width: 120px;
+    min-height: 120px;
+  }
+}
+
+@media (max-width: 540px) {
+  html, body { font-size: 14px; }
+  #grid-container { gap: 4px; }
+  .tile { font-size: 1rem; min-width: 30px; min-height: 30px;}
+  .modal { padding: 1.1rem .65rem; min-width: 150px;}
+}

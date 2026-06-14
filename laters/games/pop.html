@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Bubble Pop Mania — Kavya</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1: #fff6fb;
+    --bg2: #fff0f8;
+    --accent: #ff7ac8;
+    --accent-2: #ffb3e0;
+    --glass: rgba(255,255,255,0.6);
+    --card-shadow: 0 12px 40px rgba(255,138,206,0.12);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:linear-gradient(160deg,var(--bg1),var(--bg2));font-family:'Nunito',sans-serif;color:#6b2160}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+  .card{width:1000px;max-width:96vw;border-radius:22px;padding:20px;background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,245,250,0.85));box-shadow:var(--card-shadow);position:relative;overflow:hidden}
+  header{display:flex;align-items:center;gap:12px}
+  .title{font-family:'Pacifico',cursive;font-size:28px;color:var(--accent);text-shadow:0 0 12px rgba(255,120,200,0.45)}
+  .top-right{margin-left:auto;display:flex;gap:12px;align-items:center}
+  .coin{background:linear-gradient(90deg,#ffd77a,#ffeab2);padding:6px 10px;border-radius:12px;font-weight:800}
+  .btn{background:linear-gradient(180deg,var(--accent),var(--accent-2));padding:10px 14px;border-radius:14px;color:white;font-weight:800;border:none;cursor:pointer;box-shadow:0 8px 28px rgba(255,110,190,0.22);transition:transform .12s}
+  .btn:active{transform:translateY(2px)}
+  .main{display:flex;gap:20px;margin-top:18px}
+  .left{flex:1;min-height:auto;background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,240,250,0.6));border-radius:14px;padding:12px;position:relative;overflow:hidden}
+  .playfield{position:relative;height:clamp(280px, 40vh, 420px);border-radius:12px;background:linear-gradient(180deg,#fff,#fff7fb);overflow:hidden;border:3px dashed rgba(255,190,230,0.25)}
+  .hud{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;}
+  .controls{display:flex;gap:8px;align-items:center;margin-left:auto;flex-wrap:wrap;}
+  .right{width:320px;min-width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.85),rgba(255,245,250,0.9));border-radius:12px;padding:12px}
+  .section-title{font-weight:800;color:#a33a84;margin-bottom:8px}
+  .stats-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(255,160,210,0.12)}
+  .small{padding:6px 10px;border-radius:10px;background:linear-gradient(180deg,#ffd6f0,#ffeaf8);font-weight:700}
+  /* bubble style */
+  .bubble{
+    position:absolute;border-radius:50%;pointer-events:auto;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    box-shadow:0 6px 18px rgba(255,150,210,0.18), inset 0 -8px 18px rgba(255,255,255,0.6);
+    user-select:none;
+  }
+  .bubble .shine{position:absolute;left:12%;top:10%;width:40%;height:40%;border-radius:50%;background:rgba(255,255,255,0.8);filter:blur(1px);opacity:.9}
+  .combo-burst{position:absolute;pointer-events:none;font-weight:900;text-shadow:0 0 10px rgba(255,180,220,0.8)}
+  /* pop particle */
+  .pop-particle{position:absolute;width:6px;height:6px;border-radius:50%;opacity:0}
+  /* shop */
+  .shop-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:10px;margin-bottom:8px;background:linear-gradient(180deg,#fff,#fff7fb)}
+  .badge{background:linear-gradient(90deg,#ffd6f0,#ffe7fb);padding:6px 8px;border-radius:10px;font-weight:800}
+  /* timer */
+  .timer-ring{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#ffeef8);box-shadow:0 6px 18px rgba(255,150,210,0.06)}
+  /* responsive */
+  @media (max-width:920px){.main{flex-direction:column}.right{width:100%}}
+  /* mouse trail (cute) reused */
+  .mouse-bubble{position:absolute;border-radius:50%;pointer-events:none;opacity:1;filter:blur(1px);box-shadow:0 0 10px rgba(255,180,220,0.8);transition:opacity .8s ease,transform .8s ease;z-index:9999}
+</style>
+  
+<style>
+#music-toggle {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background: linear-gradient(135deg, #ffbde8, #ffc8ee);
+  border: none;
+  color: white;
+  font-size: 22px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(255, 170, 230, 0.7);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 9999;
+  animation: softFloat 3s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+#music-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 25px rgba(255, 190, 240, 0.9);
+}
+
+@keyframes softFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+#music-toggle.active {
+  background: linear-gradient(135deg, #ff88d1, #ffa8e6);
+  box-shadow: 0 0 25px rgba(255, 160, 240, 1);
+}
+</style>
+
+<style>
+#back-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, #ffc6eb, #ffb0e1);
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(255, 170, 230, 0.7);
+  transition: all 0.25s ease;
+  z-index: 10000;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+#back-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(255, 190, 240, 0.9);
+}
+
+#back-btn:active {
+  transform: scale(0.95);
+}
+</style>
+  
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="root">
+      <header>
+        <div class="title">Bubble Pop Mania 🫧</div>
+        <div class="top-right">
+          <div class="coin" id="coinDisplay">💰 0</div>
+          <button class="btn" id="startRoundBtn">Start Round</button>
+          <button class="btn" id="shopBtn">Shop</button>
+        </div>
+      </header>
+
+      <div class="main">
+        <div class="left">
+          <div class="playfield" id="playfield" aria-label="Game area — pop bubbles">
+            <!-- bubbles will be appended here -->
+          </div>
+
+          <div class="hud">
+            <div class="small" id="scoreDisplay">Score: 0</div>
+            <div class="small" id="comboDisplay">Combo: x1</div>
+            <div class="controls">
+              <button class="btn" id="autoPopBtn">Auto Pop: OFF</button>
+              <button class="btn" id="clearBtn">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="right">
+          <div class="section-title">Game Mode</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div class="timer-ring" id="timerRing"><div id="timeLeft">∞</div></div>
+            <div>
+              <div style="font-weight:800;color:#b44b94">Mix Mode</div>
+              <div style="font-size:13px;color:#a35a8a">Pop to earn coins; start timed rounds for higher rewards.</div>
+            </div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div class="section-title">Upgrades</div>
+          <div class="stats-row">
+            <div>Pop Value</div><div id="popValue">+1</div>
+          </div>
+          <div class="stats-row">
+            <div>Auto Pop Speed</div><div id="autoRate">Off</div>
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div class="section-title">Shop</div>
+          <div id="shopList">
+            <!-- shop populated by JS -->
+          </div>
+
+          <div style="height:10px"></div>
+          <div class="section-title">Tips</div>
+          <div style="font-size:13px;color:#a35a8a">Burst big bubbles for combos. Start rounds for multiplier bonuses!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- sounds: place these files in same folder as the HTML -->
+  <!-- Required suggestions (use cute pastel sounds): 
+       pop_soft.mp3  (soft bubble pop)
+       pop_twinkle.mp3 (sparkly pop for combos)
+       combo_jingle.mp3 (short combo jingle)
+       big_pop.mp3 (rare big bubble pop)
+       bg_loop.mp3 (optional bg music)
+  -->
+  <audio id="s_pop" src="pop_soft.mp3" preload="auto"></audio>
+  <audio id="s_twinkle" src="pop_twinkle.mp3" preload="auto"></audio>
+  <audio id="s_combo" src="combo_jingle.mp3" preload="auto"></audio>
+  <audio id="s_big" src="big_pop.mp3" preload="auto"></audio>
+  <audio id="s_bg" src="bgm.mp3" preload="auto" loop></audio>
+  <button id="back-btn" onclick="window.location.href='../direct.html'">← Back</button>
+<button id="music-toggle">🎵</button>
+
+    </div>
+  <!-- Cute Right-Click Popup -->
+  <div id="rightClickPopup" style="
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 182, 193, 0.95);
+    color: #000;
+    font-family: 'Signika', sans-serif;
+    padding: 20px clamp(15px, 5vw, 40px);
+    border-radius: 20px;
+    font-size: clamp(16px, 4.5vw, 20px);
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
+    text-align: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    width: min(320px, 90vw);
+  ">
+    🚫 No peeking! Kavya, sorry bout that 
+  </div>
+
+  <script>
+  // Disable Right-Click with Cute Popup
+  document.addEventListener('contextmenu', function (event) {
+    event.preventDefault();
+    const popup = document.getElementById('rightClickPopup');
+    popup.style.display = 'block';
+    setTimeout(() => popup.style.opacity = '1', 10);
+
+    // Fade out after 2 seconds
+    setTimeout(() => {
+      popup.style.opacity = '0';
+      setTimeout(() => popup.style.display = 'none', 500);
+    }, 2000);
+  });
+  </script>
+
+  
+<script>
+/* ------------------- CONFIG ------------------- */
+const CONFIG = {
+  spawnInterval: 700,         // base spawn frequency (ms)
+  maxBubbles: 18,             // cap in field (higher = more chaotic)
+  bubbleMinSize: 32,
+  bubbleMaxSize: 110,
+  basePopValue: 1,            // coins per normal pop
+  roundDuration: 20,          // seconds for a round
+  roundMultiplier: 2.5,       // multiplier for pop value during round
+  comboWindow: 900,           // ms window to chain combos
+};
+
+/* ------------------- STATE ------------------- */
+let state = {
+  coins: 0,
+  score: 0,
+  popValue: CONFIG.basePopValue,
+  autoPop: false,
+  autoInterval: 0,
+  combo: 1,
+  lastPopTime: 0,
+  comboCount: 0,
+  inRound: false,
+  timeLeft: Infinity
+};
+
+// load saved
+try {
+  const saved = JSON.parse(localStorage.getItem('zillie:bubble'));
+  if (saved) Object.assign(state, saved);
+} catch(e){}
+
+/* ------------------- DOM ------------------- */
+const playfield = document.getElementById('playfield');
+const coinDisplay = document.getElementById('coinDisplay');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const comboDisplay = document.getElementById('comboDisplay');
+const popValueEl = document.getElementById('popValue');
+const autoRateEl = document.getElementById('autoRate');
+const shopList = document.getElementById('shopList');
+const startRoundBtn = document.getElementById('startRoundBtn');
+const timerRing = document.getElementById('timeLeft');
+const autoPopBtn = document.getElementById('autoPopBtn');
+const clearBtn = document.getElementById('clearBtn');
+const shopBtn = document.getElementById('shopBtn');
+
+/* ------------------- SOUNDS ------------------- */
+const S = {
+  pop: document.getElementById('s_pop'),
+  twinkle: document.getElementById('s_twinkle'),
+  combo: document.getElementById('s_combo'),
+  big: document.getElementById('s_big'),
+  bg: document.getElementById('s_bg')
+};
+S.bg.volume = 0.28;
+
+/* start background on first gesture for autoplay rules */
+document.body.addEventListener('click', function startBg(){
+  S.bg.play().catch(()=>{});
+  document.body.removeEventListener('click', startBg);
+});
+
+/* ------------------- UTILS ------------------- */
+function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function saveState(){ localStorage.setItem('zillie:bubble', JSON.stringify(state)); updateHUD(); }
+function updateHUD(){
+  coinDisplay.textContent = `💰 ${state.coins}`;
+  scoreDisplay.textContent = `Score: ${state.score}`;
+  comboDisplay.textContent = `Combo: x${state.combo}`;
+  popValueEl.textContent = `+${state.popValue}`;
+  autoRateEl.textContent = state.autoPop ? `${state.autoInterval}ms` : 'Off';
+  timerRing.textContent = state.inRound ? `${Math.ceil(state.timeLeft)}s` : '∞';
+}
+updateHUD();
+
+/* ------------------- BUBBLE GENERATION ------------------- */
+let spawnTimer = null;
+function startSpawning(){
+  if (spawnTimer) return;
+  spawnTimer = setInterval(spawnBubble, CONFIG.spawnInterval);
+}
+function stopSpawning(){ clearInterval(spawnTimer); spawnTimer = null; }
+
+function spawnBubble(){
+  const current = playfield.querySelectorAll('.bubble').length;
+  if (current >= CONFIG.maxBubbles) return;
+
+  // size & position
+  const size = rnd(CONFIG.bubbleMinSize, CONFIG.bubbleMaxSize);
+  const x = rnd(8, playfield.clientWidth - size - 8);
+  const y = rnd(8, playfield.clientHeight - size - 8);
+
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.style.width = size + 'px';
+  b.style.height = size + 'px';
+  b.style.left = x + 'px';
+  b.style.top = y + 'px';
+  b.style.zIndex = 200 + Math.floor((size)); // larger on top
+
+  // pastel color set (gacha pastel)
+  const palettes = [
+    ['#ffd6f2','#fff0fb'],
+    ['#ffd6e8','#fff7fb'],
+    ['#fff2b8','#fff7f0'],
+    ['#e8f2ff','#f7fbff'],
+    ['#ffd1ff','#fff7fb']
+  ];
+  const pal = pick(palettes);
+  b.style.background = `radial-gradient(circle at 30% 30%, ${pal[1]} 0%, ${pal[0]} 45%)`;
+  b.innerHTML = '<div class="shine"></div>';
+
+  // assign rarity by size (just for fun: bigger = rarer)
+  const rarity = size > 85 ? 'legend' : size > 65 ? 'rare' : 'common';
+  b.dataset.rarity = rarity;
+  b.dataset.size = size;
+
+  // pearl border for bigger ones
+  if (rarity === 'rare') b.style.boxShadow = '0 12px 28px rgba(154,214,255,0.25), inset 0 -8px 18px rgba(255,255,255,0.6)';
+  if (rarity === 'legend') b.style.boxShadow = '0 18px 48px rgba(255,200,240,0.25), inset 0 -12px 26px rgba(255,255,255,0.7)';
+
+  // float animation (gentle)
+  const floatY = rnd(6, 28);
+  b.animate([{ transform: 'translateY(0px)' }, { transform: `translateY(-${floatY}px)` }, { transform: 'translateY(0px)' }],
+    { duration: rnd(3500,8000), iterations: Infinity, easing: 'ease-in-out' }
+  );
+
+  // pointer events: click to pop
+  const triggerPop = (ev) => {
+    ev.stopPropagation();
+    ev.preventDefault();
+    popBubble(b, true);
+  };
+  b.addEventListener('click', triggerPop);
+  b.addEventListener('touchstart', triggerPop, { passive: false });
+
+  playfield.appendChild(b);
+
+  // auto-remove tiny ones after some time to keep scene fresh
+  setTimeout(()=>{ if (b && b.parentElement) b.remove(); }, 25000 + Math.random()*15000);
+}
+
+/* ------------------- POP LOGIC ------------------- */
+function popBubble(bubbleEl, userTriggered=false){
+  if (!bubbleEl || !bubbleEl.parentElement) return;
+  const rarity = bubbleEl.dataset.rarity;
+  const size = +bubbleEl.dataset.size;
+  // determine coin value
+  let base = state.popValue;
+  if (rarity === 'rare') base *= 6;
+  if (rarity === 'legend') base *= 18;
+
+  // multiplier if in round
+  const multiplier = state.inRound ? CONFIG.roundMultiplier : 1;
+  // combo logic
+  const now = Date.now();
+  if (now - state.lastPopTime <= CONFIG.comboWindow) {
+    state.comboCount++;
+    state.combo = Math.min(1 + Math.floor(state.comboCount/3), 8);
+    // play combo sound occasionally
+    if (state.comboCount % 5 === 0) S.combo.currentTime = 0, S.combo.play().catch(()=>{});
+  } else {
+    state.comboCount = 1;
+    state.combo = 1;
+  }
+  state.lastPopTime = now;
+
+  const totalValue = Math.floor(base * multiplier * state.combo);
+  state.coins += totalValue;
+  state.score += Math.floor(totalValue * (rarity === 'legend' ? 4 : rarity === 'rare' ? 2 : 1));
+  // sounds
+  if (rarity === 'legend') { S.big.currentTime = 0; S.big.play().catch(()=>{}); }
+  else if (state.combo > 2) { S.twinkle.currentTime = 0; S.twinkle.play().catch(()=>{}); }
+  else { S.pop.currentTime = 0; S.pop.play().catch(()=>{}); }
+
+  // pop animation: scale + particles
+  bubbleEl.style.transition = 'transform .22s ease, opacity .3s ease';
+  bubbleEl.style.transform = 'scale(1.25)';
+  bubbleEl.style.opacity = '0';
+
+  // combo burst text
+  const burst = document.createElement('div');
+  burst.className = 'combo-burst';
+  burst.style.left = (parseFloat(bubbleEl.style.left) + (parseFloat(bubbleEl.style.width)/2)) + 'px';
+  burst.style.top = (parseFloat(bubbleEl.style.top) + (parseFloat(bubbleEl.style.height)/2)) + 'px';
+  burst.style.zIndex = 9999;
+  burst.style.color = '#ff5aa6';
+  burst.style.fontSize = Math.min(20 + state.combo*3, 40) + 'px';
+  burst.textContent = `+${totalValue}`;
+  document.body.appendChild(burst);
+  // animate burst up & fade
+  burst.animate([{ transform: 'translateY(0px)', opacity: 1 }, { transform: 'translateY(-36px)', opacity: 0 }], { duration: 700, easing: 'ease-out' });
+  setTimeout(()=>burst.remove(), 800);
+
+  createPopParticles(bubbleEl, rarity);
+
+  setTimeout(()=> bubbleEl.remove(), 220);
+
+  // update HUD & save
+  updateHUD();
+  saveState();
+}
+
+/* particle sparkles on pop */
+function createPopParticles(bubbleEl, rarity){
+  const count = rarity === 'legend' ? 18 : rarity === 'rare' ? 10 : 6;
+  const rect = playfield.getBoundingClientRect();
+  for (let i=0;i<count;i++){
+    const p = document.createElement('div');
+    p.className = 'pop-particle';
+    document.body.appendChild(p);
+    const sx = rect.left + parseFloat(bubbleEl.style.left) + rnd(6, parseFloat(bubbleEl.style.width)-6);
+    const sy = rect.top + parseFloat(bubbleEl.style.top) + rnd(6, parseFloat(bubbleEl.style.height)-6);
+    p.style.left = sx + 'px';
+    p.style.top = sy + 'px';
+    const hueSet = ['#ffd6f2','#fff2b8','#cbedff','#ffd1ff','#ffdceb'];
+    p.style.background = pick(hueSet);
+    p.style.opacity = '1';
+    const tx = sx + rnd(-120,120);
+    const ty = sy + rnd(-120,-20);
+    p.animate([{ transform: 'translate(0,0)', opacity:1 }, { transform: `translate(${tx-sx}px, ${ty-sy}px) rotate(${rnd(-360,360)}deg)`, opacity:0 }], { duration: 600 + Math.random()*600, easing:'cubic-bezier(.17,.67,.34,1.28)' });
+    setTimeout(()=> p.remove(), 1400);
+  }
+}
+
+/* ------------------- AUTO POP (OPTIONAL) ------------------- */
+let autoTimer = null;
+autoPopBtn.addEventListener('click', ()=>{
+  state.autoPop = !state.autoPop;
+  if (state.autoPop) {
+    // set speed based on popValue (faster when upgraded). default 900ms
+    state.autoInterval = Math.max(180, 900 - (state.popValue*20));
+    autoTimer = setInterval(()=>{
+      // find a bubble to auto-pop (prefers large)
+      const bubbles = Array.from(playfield.querySelectorAll('.bubble')).sort((a,b)=> +b.dataset.size - +a.dataset.size);
+      if (bubbles.length) popBubble(bubbles[0], false);
+    }, state.autoInterval);
+    autoPopBtn.textContent = 'Auto Pop: ON';
+  } else {
+    clearInterval(autoTimer); autoTimer = null;
+    autoPopBtn.textContent = 'Auto Pop: OFF';
+  }
+  updateHUD(); saveState();
+});
+
+/* clear field */
+clearBtn.addEventListener('click', ()=> {
+  Array.from(playfield.querySelectorAll('.bubble')).forEach(b=>b.remove());
+});
+
+/* ------------------- SHOP / UPGRADES ------------------- */
+const SHOP = [
+  { id:'pop+1', name:'Upgrade Pop +1', cost: 120, apply: ()=> { state.popValue += 1; } },
+  { id:'pop+5', name:'Upgrade Pop +5', cost: 520, apply: ()=> { state.popValue += 5; } },
+  { id:'auto+fast', name:'Improve Auto Speed', cost: 450, apply: ()=> { state.autoInterval = Math.max(120, (state.autoInterval || 900) - 200); if (state.autoPop){ clearInterval(autoTimer); autoTimer = setInterval(()=>{ const bubbles = Array.from(playfield.querySelectorAll('.bubble')).sort((a,b)=> +b.dataset.size - +a.dataset.size); if (bubbles.length) popBubble(bubbles[0], false); }, state.autoInterval); } } },
+  { id:'max+cap', name:'Increase Max Bubbles', cost: 400, apply: ()=> { CONFIG.maxBubbles += 6; } },
+];
+
+function renderShop(){
+  shopList.innerHTML = '';
+  SHOP.forEach(it=>{
+    const el = document.createElement('div'); el.className='shop-item';
+    el.innerHTML = `<div style="display:flex;gap:10px;align-items:center"><div style="font-size:20px">✨</div><div><div style="font-weight:800">${it.name}</div><div style="font-size:12px;color:#9b5a8c">One-time purchase</div></div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end">
+        <div class="badge">${it.cost}💰</div>
+        <button class="btn" style="margin-top:6px" data-id="${it.id}">Buy</button>
+      </div>`;
+    shopList.appendChild(el);
+    el.querySelector('button').addEventListener('click', ()=>{
+      if (state.coins < it.cost){ alert('Not enough coins! Pop more bubbles 🫧'); return; }
+      state.coins -= it.cost;
+      it.apply();
+      S.twinkle.currentTime = 0; S.twinkle.play().catch(()=>{});
+      updateHUD(); saveState(); renderShop();
+    });
+  });
+}
+renderShop();
+
+/* open/close shop */
+shopBtn.addEventListener('click', ()=>{
+  const isOpen = shopList.style.display !== 'none';
+  shopList.style.display = isOpen ? 'none' : 'block';
+});
+
+/* ------------------- TIMED ROUND ------------------- */
+let roundTimer = null;
+startRoundBtn.addEventListener('click', ()=>{
+  if (state.inRound) { endRound(); return; }
+  startRound();
+});
+
+function startRound(){
+  state.inRound = true;
+  state.timeLeft = CONFIG.roundDuration;
+  startRoundBtn.textContent = 'End Round';
+  // temporarily increase spawn rate and max bubbles
+  const prevInterval = CONFIG.spawnInterval;
+  const prevMax = CONFIG.maxBubbles;
+  CONFIG.spawnInterval = Math.max(200, CONFIG.spawnInterval/1.6);
+  CONFIG.maxBubbles = prevMax + 6;
+  // ensure spawning
+  stopSpawning(); startSpawning();
+
+  roundTimer = setInterval(()=>{
+    state.timeLeft -= 1;
+    if (state.timeLeft <= 0) { endRound(); }
+    updateHUD();
+  }, 1000);
+  updateHUD();
+}
+
+function endRound(){
+  state.inRound = false;
+  state.timeLeft = Infinity;
+  startRoundBtn.textContent = 'Start Round';
+  // restore defaults (just reload page-level configs by reset)
+  CONFIG.spawnInterval = 700;
+  CONFIG.maxBubbles = Math.max(12, CONFIG.maxBubbles - 6);
+  stopSpawning(); startSpawning();
+  clearInterval(roundTimer); roundTimer = null;
+  // reward bonus coins based on performance (score)
+  const bonus = Math.floor((state.score/10) + (state.combo * 5));
+  if (bonus > 0) {
+    state.coins += bonus;
+    // show small popup
+    const p = document.createElement('div'); p.className='combo-burst'; p.style.left='50%'; p.style.top='20%'; p.style.transform='translateX(-50%)'; p.style.color='#ff6aa3';
+    p.textContent = `Round Bonus +${bonus}💰`; document.body.appendChild(p);
+    p.animate([{ transform:'translateY(0)', opacity:1 },{ transform:'translateY(-36px)', opacity:0 }], { duration:900 });
+    setTimeout(()=>p.remove(),1000);
+    S.combo.currentTime=0; S.combo.play().catch(()=>{});
+  }
+  updateHUD(); saveState();
+}
+
+/* ------------------- AUTO SPAWN PLAYFIELD LOOP ------------------- */
+startSpawning();
+
+/* ------------------- CLICK ON PLAYFIELD (pop small bubble where clicked) ------------------- */
+const spawnOnTap = (ev) => {
+  // prevent double trigger on simulated clicks
+  if (ev.type === 'touchstart' && ev.touches.length > 1) return;
+  const rect = playfield.getBoundingClientRect();
+  const clientX = ev.touches ? ev.touches[0].clientX : ev.clientX;
+  const clientY = ev.touches ? ev.touches[0].clientY : ev.clientY;
+  const x = clientX - rect.left;
+  const y = clientY - rect.top;
+  const size = rnd(28, 48);
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.style.width = size + 'px';
+  b.style.height = size + 'px';
+  b.style.left = (x - size/2) + 'px';
+  b.style.top = (y - size/2) + 'px';
+  b.style.background = `radial-gradient(circle at 30% 30%, #fff7fb 0%, #ffd6f2 45%)`;
+  b.dataset.rarity = 'common';
+  b.dataset.size = size;
+  b.innerHTML = '<div class="shine"></div>';
+  playfield.appendChild(b);
+  // auto-pop after tiny delay
+  setTimeout(()=> popBubble(b, true), 140);
+};
+playfield.addEventListener('click', spawnOnTap);
+playfield.addEventListener('touchstart', spawnOnTap, { passive: true });
+
+/* ------------------- MOUSE TRAIL (cute bubbly) ------------------- */
+document.addEventListener('mousemove', (e)=>{
+  const trail = document.createElement('div');
+  trail.classList.add('mouse-bubble');
+  const size = 6 + Math.random()*14;
+  trail.style.width = size + 'px'; trail.style.height = size + 'px';
+  trail.style.left = (e.pageX - size/2) + 'px'; trail.style.top = (e.pageY - size/2) + 'px';
+  trail.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(255,200,230,0.45))`;
+  document.body.appendChild(trail);
+  setTimeout(()=>{ trail.style.opacity='0'; trail.style.transform='translateY(-8px) scale(1.2)'; }, 60);
+  setTimeout(()=> trail.remove(), 900);
+});
+
+/* ------------------- INITIALIZE / SAVE LOOP ------------------- */
+updateHUD(); saveState();
+setInterval(saveState, 5000);
+
+/* ------------------- OPTIONAL: Keyboard shortcuts for fun ------------------- */
+document.addEventListener('keydown', (e)=>{
+  if (e.key === ' ') { // space = spawn an extra batch
+    for (let i=0;i<3;i++) spawnBubble();
+  } else if (e.key === 'm') {
+    // collect small amount
+    state.coins += 5; updateHUD(); saveState(); S.pop.currentTime=0; S.pop.play().catch(()=>{});
+  } else if (e.key === 'Escape') {
+    // quick clear
+    Array.from(playfield.querySelectorAll('.bubble')).forEach(b=>b.remove());
+  }
+});
+</script>
+
+<script>
+const bgm = document.getElementById("s_bg");
+const toggleBtn = document.getElementById("music-toggle");
+
+let musicOn = false;
+
+toggleBtn.addEventListener("click", () => {
+  if (musicOn) {
+    bgm.pause();
+    toggleBtn.classList.remove("active");
+    toggleBtn.textContent = "🔇";
+  } else {
+    bgm.play().catch(()=>{});
+    toggleBtn.classList.add("active");
+    toggleBtn.textContent = "🎵";
+  }
+  musicOn = !musicOn;
+});
+</script>
+</body>
+</html>

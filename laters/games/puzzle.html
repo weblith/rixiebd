@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>rixieQuest: Puzzle Adventure</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+  .back-btn {
+  position: fixed;
+  left: 16px;
+  top: 16px;
+  background: linear-gradient(135deg, rgba(255,200,230,0.95), rgba(255,150,200,0.85));
+  color: violet;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 10px 18px;
+  border: 1px solid rgba(255, 120, 170, 0.4);
+  box-shadow: 0 6px 20px rgba(140, 30, 70, 0.15);
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.25s ease;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+.back-btn:hover {
+  background: linear-gradient(135deg, #ff9ec9, #ff7ab6);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(255, 120, 160, 0.25);
+}
+</style>
+  
+</head>
+<body>
+    
+  <div class="back-btn" onclick="location.href='../direct.html'">← Back</div>
+
+  <header>
+    <h1><span id="game-title">LogicQuest: Puzzle Adventure</span></h1>
+    <nav>
+      <button id="reset-btn" title="Restart Level">⟳</button>
+      <button id="mute-btn" aria-label="Toggle Sound">🔇</button>
+      <span id="level-indicator"></span>
+      <span id="progress-bar-wrapper">
+        <progress id="progress-bar" max="15" value="1"></progress>
+      </span>
+    </nav>
+  </header>
+  <main>
+    <section id="game-section">
+      <div id="grid-container"></div>
+      <div id="objectives"></div>
+      <div id="controller-panel">
+        <div class="stat-block"><span id="timer-label"></span> <span id="timer-value"></span></div>
+        <div class="stat-block"><span id="moves-label"></span> <span id="moves-value"></span></div>
+      </div>
+    </section>
+    <section id="level-menu" class="modal hidden">
+      <h2>Select Level</h2>
+      <div id="level-list"></div>
+      <button id="close-level-menu">Close</button>
+    </section>
+    <section id="complete-modal" class="modal hidden" role="dialog" aria-modal="true">
+      <h2>Level Complete!</h2>
+      <p id="completion-message"></p>
+      <div class="performance">
+        <span>Moves: <span id="complete-moves"></span></span>
+        <span>Time: <span id="complete-time"></span></span>
+      </div>
+      <button id="next-level-btn">Next Level</button>
+      <button id="restart-level-btn">Replay Level</button>
+      <button id="menu-btn">Level Menu</button>
+    </section>
+    <section id="fail-modal" class="modal hidden" role="dialog" aria-modal="true">
+      <h2>Try Again!</h2>
+      <p id="fail-message"></p>
+      <button id="retry-btn">Retry</button>
+      <button id="menu-btn-2">Level Menu</button>
+    </section>
+  </main>
+  <footer>
+    <small>rixiequest ;)</small>
+  </footer>
+    </div>
+  <!-- Cute Right-Click Popup -->
+  <div id="rightClickPopup" style="
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 182, 193, 0.95);
+    color: #000;
+    font-family: 'Signika', sans-serif;
+    padding: 20px clamp(15px, 5vw, 40px);
+    border-radius: 20px;
+    font-size: clamp(16px, 4.5vw, 20px);
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
+    text-align: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    width: min(320px, 90vw);
+  ">
+    🚫 No peeking! Kavya, sorry bout that 
+  </div>
+
+  <script>
+  // Disable Right-Click with Cute Popup
+  document.addEventListener('contextmenu', function (event) {
+    event.preventDefault();
+    const popup = document.getElementById('rightClickPopup');
+    popup.style.display = 'block';
+    setTimeout(() => popup.style.opacity = '1', 10);
+
+    // Fade out after 2 seconds
+    setTimeout(() => {
+      popup.style.opacity = '0';
+      setTimeout(() => popup.style.display = 'none', 500);
+    }, 2000);
+  });
+  </script>
+
+  <script src="game.js"></script>
+</body>
+</html>

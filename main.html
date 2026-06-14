@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cute Quiz 💖</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #ffdde1, #ffc2e2);
+      font-family: "Comic Sans MS", cursive, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      padding: 20px;
+      flex-direction: column;
+      color: #ff4da6;
+    }
+
+    .card {
+      background: #fff0f6;
+      padding: clamp(20px, 5vw, 30px);
+      border-radius: 25px;
+      box-shadow: 0 8px 20px rgba(255, 105, 180, 0.3);
+      text-align: center;
+      width: 100%;
+      max-width: 350px;
+      animation: popIn 0.6s ease;
+      box-sizing: border-box;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    button {
+      padding: 12px 24px;
+      margin: 8px;
+      border: none;
+      border-radius: 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+      min-height: 44px;
+      touch-action: manipulation;
+    }
+
+    .yes-btn {
+      background: #ff66b3;
+      color: white;
+    }
+
+    .yes-btn:hover {
+      background: #ff3399;
+      transform: scale(1.05);
+    }
+
+    .no-btn {
+      background: #ffe6f2;
+      color: #ff3399;
+    }
+
+    .no-btn:hover {
+      background: #ffccf2;
+      transform: scale(1.05);
+    }
+
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255, 192, 203, 0.6);
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+      z-index: 1000;
+    }
+
+    .popup-content {
+      background: #fff0f6;
+      padding: clamp(15px, 5vw, 25px);
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+      animation: bounceIn 0.5s ease;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.6); opacity: 0; }
+      60% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    .confetti {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .confetti div {
+      width: 10px; height: 10px;
+      background: pink;
+      position: absolute;
+      animation: fall 3s linear infinite;
+      border-radius: 50%;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(-10px) rotate(0deg); }
+      100% { transform: translateY(100vh) rotate(360deg); }
+    }
+  </style>
+
+  <style>
+    /* Heart Bubble Trail */
+    .heart {
+      position: fixed;
+      font-size: 16px;
+      color: #ff66b3;
+      pointer-events: none;
+      animation: floatUp 1s ease forwards;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-50px) scale(1.8); opacity: 0; }
+    }
+  </style>
+
+  <style>
+    /* Fade out animation */
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    /* Cute outro text */
+    .outro {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: clamp(20px, 6vw, 28px);
+      width: 90%;
+      text-align: center;
+      color: #ff4da6;
+      font-family: "Comic Sans MS", cursive, sans-serif;
+      text-shadow: 0 0 10px #ff99cc, 0 0 20px #ff66b3;
+      opacity: 0;
+      animation: outroFade 2s ease forwards;
+    }
+
+    @keyframes outroFade {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 id="question">Are you pretty/beautiful? :)</h2>
+    <button class="yes-btn" onclick="handleYes()">Yes <3 </button>
+    <button class="no-btn" onclick="handleNo()">No :(</button>
+  </div>
+
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <p id="popup-message"></p>
+      <button onclick="closePopup()">OK :D</button>
+    </div>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <script>
+    const questions = [
+      { q: "Are you pretty/beautiful? :)", msg: "You literally are pretty, don't degrade yourself yknow, if you compare then there are always bigger fishes in the market but don't forget that both the ocean and the flower is beautiful but are they similar? No, they are not, they are unique and beautiful in their own way, similarly you are unique, you are beautiful, you are pretty and you are special too ✨" },
+      { q: "You Don't want to die right? 💢", msg: "Don't you dare think of it, you are not going anywhere alright? times are tuff, they maybe temporary but not this life, life is way more than what you're suffering from, the suffering range may be high but you are not alone, you are loved, you are loved by me, you are loved by your family, you are loved by your friends, you are loved by your neighbors, you are loved by your teachers," },
+      { q: "Do you Love yourself <3 ", msg: "You must love yourself yknow, even if you dont, its alright, I love you, but you deserve to be loved by yourself too yknow, now re-attempt the quiz again ohkay :3" },
+      { q: "Are you an awesome / amazing person :3", msg: "You indeed are an amazing person, atleast better than anyone I know :)" },
+      { q: "Are you loved? 💌", msg: "Yes you are! By more people than you even realize :D " }
+    ];
+
+    let current = 0;
+    let noCount = 0;
+
+    function handleYes() {
+      spawnConfetti();
+      setTimeout(() => {
+        nextQuestion();
+      }, 1200);
+    }
+
+    function handleNo() {
+      noCount++;
+      document.getElementById("popup-message").innerText = questions[current].msg;
+      document.getElementById("popup").style.display = "flex";
+
+      if (noCount >= 3) {
+        document.querySelector(".no-btn").style.display = "none";
+      }
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+
+    function nextQuestion() {
+      noCount = 0;
+      document.querySelector(".no-btn").style.display = "inline-block";
+      current++;
+      if (current < questions.length) {
+        document.getElementById("question").innerText = questions[current].q;
+      } else {
+        document.getElementById("question").innerText = "Yay! You finished all questions! 🎉💖";
+        document.querySelector(".yes-btn").style.display = "none";
+        document.querySelector(".no-btn").style.display = "none";
+      }
+    }
+
+    function spawnConfetti() {
+      const confetti = document.getElementById("confetti");
+      for (let i = 0; i < 20; i++) {
+        const div = document.createElement("div");
+        div.style.left = Math.random() * 100 + "vw";
+        div.style.background = ["#ff99cc","#ffb3d9","#ff66b3","#ff80bf"][Math.floor(Math.random()*4)];
+        div.style.animationDuration = (2 + Math.random() * 2) + "s";
+        confetti.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+      }
+    }
+  </script>
+
+  <script>
+    // 🎀 Cute Heart Mouse Trail
+    let lastMove = 0;
+    document.addEventListener("mousemove", (e) => {
+      const now = Date.now();
+      if (now - lastMove < 50) return; // limit heart spawn rate
+      lastMove = now;
+
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.innerHTML = ":3";
+      heart.style.left = (e.pageX - 10) + "px";
+      heart.style.top = (e.pageY - 10) + "px";
+      heart.style.fontSize = (12 + Math.random() * 16) + "px";
+      document.body.appendChild(heart);
+
+      setTimeout(() => heart.remove(), 1000);
+    });
+  </script>
+
+  <script>
+    // 🚫 Disable Right Click with Cute Popup
+    document.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      const popup = document.getElementById("popup");
+      const msg = document.getElementById("popup-message");
+      msg.innerText = "Hehe, no right-click allowed here Kavya! ;)";
+      popup.style.display = "flex";
+    });
+
+  </script>
+
+  <script>
+    function nextQuestion() {
+      noCount = 0;
+      document.querySelector(".no-btn").style.display = "inline-block";
+      current++;
+      if (current < questions.length) {
+        document.getElementById("question").innerText = questions[current].q;
+      } else {
+        document.getElementById("question").innerText = "Yay! You finished all questions! 🎉💖";
+        document.querySelector(".yes-btn").style.display = "none";
+        document.querySelector(".no-btn").style.display = "none";
+
+        // After 2 seconds fade out
+        setTimeout(() => {
+          const card = document.querySelector(".card");
+          card.style.animation = "fadeOut 1s forwards";
+
+          // After fade out, show outro text
+          setTimeout(() => {
+            card.style.display = "none";
+            const outro = document.createElement("div");
+            outro.className = "outro";
+            outro.innerText = "Let's turn off all the lights...";
+            document.body.appendChild(outro);
+
+            // After outro animation, go to bd.html
+            setTimeout(() => {
+              window.location.href = "bd.html";
+            }, 4000); // 4s delay before redirect
+          }, 1000); // wait for fadeOut animation
+        }, 2000); // wait before fadeOut
+      }
+    }
+
+  </script>
+</body>
+</html>

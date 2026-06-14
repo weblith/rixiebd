@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>simple games ;)</title>
+  <style>
+    :root{
+      --bg1:#fff0f6; --bg2:#ffeef8; --accent:#ff7ab6; --muted:#f6d9e8; --glass: rgba(255,255,255,0.6);
+      --shadow: 0 8px 30px rgba(255,120,170,0.12);
+      --glass-border: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.5));
+      --radius:20px;
+      font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background: radial-gradient(1200px 600px at 10% 10%, #fff6fb 0%, transparent 10%), radial-gradient(800px 400px at 90% 90%, #fff0f2 0%, transparent 8%), linear-gradient(180deg,var(--bg1),var(--bg2)); color:#333}
+
+    header{
+      display:flex;align-items:center;gap:16px;padding:18px 28px;
+      padding-left: 110px;
+      backdrop-filter: blur(6px) saturate(1.05);
+    }
+    .logo{
+      display:flex;align-items:center;gap:12px;
+    }
+    .logo .badge{
+      width:64px;height:64px;border-radius:16px;display:grid;place-items:center;font-weight:800;font-size:22px;color:white;
+      background: conic-gradient(from 120deg,#ffb0d9, #ff7ab6, #ffd0ea);
+      box-shadow: 0 6px 18px rgba(255,80,150,0.12), inset 0 -6px 20px rgba(0,0,0,0.03);
+    }
+    .title{font-size:18px;font-weight:700;letter-spacing:0.4px}
+    .subtitle{font-size:12px;color:#9b6b86}
+
+    main{max-width:1100px;margin:28px auto;padding:28px}
+    .hero{
+      display:flex;gap:24px;align-items:center;background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45));
+      border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.6);
+    }
+    .hero-left{flex:1}
+    .hero h1{margin:0;font-size:30px;color:#7a1840}
+    .hero p{margin:8px 0 0;color:#7a2440;opacity:0.9}
+    .cta{margin-top:14px;display:flex;gap:12px}
+    .btn{padding:10px 16px;border-radius:12px;border:0;font-weight:700;cursor:pointer;box-shadow: 0 8px 18px rgba(120,40,90,0.08)}
+    .btn-play{background:linear-gradient(90deg,var(--accent),#ff9ac8);color:white}
+    .btn-ghost{background:transparent;border:1px dashed rgba(122,36,64,0.12);color:#7a1840}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:22px}
+    .card{
+      border-radius:18px;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
+      box-shadow: 0 10px 40px rgba(250,120,180,0.06);border:1px solid rgba(255,255,255,0.6);
+      position:relative;overflow:hidden;transition:transform .35s ease,box-shadow .35s ease;
+    }
+    .card:hover{transform:translateY(-8px);box-shadow:0 18px 60px rgba(255,80,150,0.12)}
+    .thumb{height:160px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:48px;background:linear-gradient(135deg,#ffd6ea,#ffd3f0);margin-bottom:12px;position:relative}
+    .heart-anim{position:absolute;right:12px;top:12px;font-size:18px;animation:floaty 3s ease-in-out infinite}
+    @keyframes floaty{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+
+    .meta{display:flex;align-items:center;justify-content:space-between}
+    .meta .name{font-weight:800;color:#6a1b3f}
+    .meta .play{background:linear-gradient(90deg,#ffd1e8,#ff8fc1);padding:8px 12px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+
+    footer{margin-top:28px;text-align:center;color:#7a2440;opacity:0.8}
+
+    /* floating music toggle */
+    .music-toggle{position:fixed;right:18px;bottom:18px;background:linear-gradient(180deg,#fff,#ffeef7);border-radius:999px;padding:12px;border:1px solid rgba(255,160,200,0.25);box-shadow:0 10px 30px rgba(255,120,160,0.12);cursor:pointer;display:flex;align-items:center;gap:10px}
+    .music-toggle img{width:22px;height:22px}
+
+    /* back button top-left */
+.back-btn {
+  position: fixed;
+  left: 16px;
+  top: 16px;
+  background: linear-gradient(135deg, rgba(255,200,230,0.95), rgba(255,150,200,0.85));
+  color: #7a1840;
+  font-weight: 700;
+  border-radius: 12px;
+  padding: 10px 18px;
+  border: 1px solid rgba(255, 120, 170, 0.4);
+  box-shadow: 0 6px 20px rgba(140, 30, 70, 0.15);
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.25s ease;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+.back-btn:hover {
+  background: linear-gradient(135deg, #ff9ec9, #ff7ab6);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(255, 120, 160, 0.25);
+}
+
+    /* responsive tweaks */
+    @media (max-width:540px){
+      .hero{flex-direction:column}
+      .logo .badge{width:52px;height:52px}
+      header { padding-left: 110px; padding-right: 16px; }
+    }
+    @media (max-width:420px){
+      .cta {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    /* small decorative animations */
+    .sparkles{position:absolute;inset:0;pointer-events:none;opacity:0.18;background-image:radial-gradient(circle at 10% 20%, rgba(255,255,255,0.8) 1px, transparent 2px), radial-gradient(circle at 70% 60%, rgba(255,255,255,0.75) 1px, transparent 3px);}    
+  </style>
+</head>
+<body>
+  <div class="back-btn" onclick="goBack()">← Back</div>
+  <header>
+    <div class="logo">
+      <div class="badge">:D</div>
+      <div>
+        <div class="title">Simple Games</div>
+        <div class="subtitle">(fillers for the website, not actually fun XD)</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-left">
+        <h1>Welcome Kavya✨</h1>
+        <p>Choose any one of the three games to play, well none of these games are actually fun but they're to fill the site</p>
+        <div class="cta">
+          <button class="btn btn-play" onclick="openFirst()">Play First; bday pop</button>
+          <button class="btn btn-ghost" onclick="shuffleGlow()">Randomize Glow</button>
+        </div>
+      </div>
+      <div style="width:240px;display:flex;align-items:center;justify-content:center">
+        <div style="width:160px;height:160px;border-radius:26px;background:linear-gradient(135deg,#fff1f8,#ffdff4);display:grid;place-items:center;font-size:28px;font-weight:900;color:#7a1840;box-shadow:var(--shadow)">♡ FUN</div>
+      </div>
+    </section>
+
+    <div class="grid" style="margin-top:20px">
+      <!-- Card 1 -->
+      <article class="card" id="card-pop">
+        <div class="thumb">🎂<div class="heart-anim">🫧</div></div>
+        <div class="meta">
+          <div>
+            <div class="name">1. Bday Pop</div>
+            <div style="font-size:12px;color:#9b6b86;margin-top:6px">A simple and boring bubble pop lol</div>
+          </div>
+          <div>
+            <button class="play" onclick="openGame('pop.html')">Play</button>
+          </div>
+        </div>
+        <div class="sparkles"></div>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="card" id="card-run">
+        <div class="thumb">🎹<div class="heart-anim">✨</div></div>
+        <div class="meta">
+          <div>
+            <div class="name">2. Tile Puzzle</div>
+            <div style="font-size:12px;color:#9b6b86;margin-top:6px">A simple tile puzzle</div>
+          </div>
+          <div>
+            <button class="play" onclick="openGame('puzzle.html')">Play</button>
+          </div>
+        </div>
+        <div class="sparkles"></div>
+      </article>
+
+      <!-- Card 3 -->
+      <article class="card" id="card-smash">
+        <div class="thumb">🧁<div class="heart-anim">🍓</div></div>
+        <div class="meta">
+          <div>
+            <div class="name">3. stone paper scissors </div>
+            <div style="font-size:12px;color:#9b6b86;margin-top:6px">just a boring stone paper scissor game</div>
+          </div>
+          <div>
+            <button class="play" onclick="openGame('stone.html')">Play</button>
+          </div>
+        </div>
+        <div class="sparkles"></div>
+      </article>
+
+    </div>
+
+    <footer>
+      made for fun ;)
+    </footer>
+  </main>
+
+  <!-- Floating music toggle -->
+  <div class="music-toggle" id="musicToggle" onclick="toggleMusic()">
+    <img id="musicIcon" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24'><path fill='%23b32363' d='M12 3v10.55A4 4 0 1014 17V7h4V3h-6z'/></svg>" />
+    <div style="font-weight:700">Music</div>
+  </div>
+
+  <audio id="bgAudio" loop preload="none">
+    <!-- Replace src with your mp3 file path -->
+    <source src="tbgm.mp3" type="audio/mpeg">
+  </audio>
+
+    <div id="rightClickPopup" style="
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 182, 193, 0.95);
+    color: #000;
+    font-family: 'Signika', sans-serif;
+    padding: 20px clamp(15px, 5vw, 40px);
+    border-radius: 20px;
+    font-size: clamp(16px, 4.5vw, 20px);
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
+    text-align: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    width: min(320px, 90vw);
+  ">
+    🚫 No peeking! Kavya, sorry bout that 
+  </div>
+  
+    <script>
+  // Disable Right-Click with Cute Popup
+  document.addEventListener('contextmenu', function (event) {
+    event.preventDefault();
+    const popup = document.getElementById('rightClickPopup');
+    popup.style.display = 'block';
+    setTimeout(() => popup.style.opacity = '1', 10);
+
+    // Fade out after 2 seconds
+    setTimeout(() => {
+      popup.style.opacity = '0';
+      setTimeout(() => popup.style.display = 'none', 500);
+    }, 2000);
+  });
+  </script>
+
+  <script>
+    function goBack(){
+      // adjust redirect path if needed
+      location.href = '../direct.html';
+    }
+    function openGame(path){
+      // open in same folder 'games' or adjust as needed
+      location.href = path;
+    }
+    function openFirst(){ openGame('pop.html') }
+
+    const audio = document.getElementById('bgAudio');
+    const icon = document.getElementById('musicIcon');
+    let playing = false;
+    function toggleMusic(){
+      if(!playing){
+        audio.play().catch(()=>{});
+        icon.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24'><path fill='%23b32363' d='M6 9v6h4l5 5V4L10 9H6z'/></svg>";
+        playing = true;
+      } else {
+        audio.pause();
+        audio.currentTime = 0;
+        icon.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24'><path fill='%23b32363' d='M12 3v10.55A4 4 0 1014 17V7h4V3h-6z'/></svg>";
+        playing = false;
+      }
+    }
+
+    // fun random glow
+    function shuffleGlow(){
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(c=>{ c.style.boxShadow = `0 14px 50px rgba(${rand(120,255)},${rand(60,140)},${rand(100,180)},0.10)` })
+    }
+    function rand(a,b){ return Math.floor(Math.random()*(b-a))+a }
+
+    // small entrance animation
+    document.addEventListener('DOMContentLoaded', ()=>{
+      document.querySelectorAll('.card').forEach((c,i)=>{ c.style.transform='translateY(14px)'; c.style.opacity=0; setTimeout(()=>{ c.style.transition='transform .5s cubic-bezier(.2,.9,.3,1),opacity .5s'; c.style.transform='translateY(0)'; c.style.opacity=1 }, 120*i) })
+    })
+  </script>
+</body>
+</html>
