@@ -4,7 +4,7 @@
 const userData = {
     name: "Kavya",
     age: 17,
-    dob: "2008-07-11", // yyyy-mm-dd format
+    dob: "2009-06-16", // yyyy-mm-dd format
     picture: "furi.jpg" // must be in the same folder
 };
 
