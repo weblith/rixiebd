@@ -20,6 +20,7 @@
     position: relative;
     padding: 20px;
     box-sizing: border-box;
+    touch-action: manipulation;
   }
 
   h1 {
@@ -163,6 +164,23 @@
   transition: opacity 0.8s ease, transform 0.8s ease;
   z-index: 9999;
 }
+.subtle-hint {
+  margin-top: 30px;
+  font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+  color: #ff85cb;
+  opacity: 0.5;
+  text-align: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  user-select: none;
+  transition: opacity 0.3s ease;
+  max-width: 90vw;
+  z-index: 10;
+}
+.subtle-hint:hover {
+  opacity: 0.9;
+}
 </style>
   
 </head>
@@ -197,6 +215,7 @@
 </div>
       
   </div>
+  <div id="easterEggHint" class="subtle-hint"></div>
   <!-- Cute Right-Click Popup -->
   <div id="rightClickPopup" style="
     display: none;
@@ -303,6 +322,56 @@ document.addEventListener('keydown', (e) => {
     typed = ''; // reset so it can trigger again
   }
 });
+
+// Device type detection & dynamic hint initialization
+const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+const hintElement = document.getElementById('easterEggHint');
+if (hintElement) {
+  if (isTouchDevice) {
+    hintElement.textContent = "💖 Psst... try tapping somewhere three times.";
+  } else {
+    hintElement.textContent = "💖 Psst... some secrets respond to a special 3-letter cheat code.";
+  }
+}
+
+// Touch-based triple tap easter egg logic (only for touch devices)
+if (isTouchDevice) {
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let tapTimestamps = [];
+
+  document.body.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) return; // Ignore multi-touch
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+  }, { passive: true });
+
+  document.body.addEventListener('touchend', (e) => {
+    if (e.changedTouches.length !== 1) return;
+    
+    const touch = e.changedTouches[0];
+    const deltaX = Math.abs(touch.clientX - touchStartX);
+    const deltaY = Math.abs(touch.clientY - touchStartY);
+    
+    // Ignore swipes/scrolls
+    if (deltaX > 10 || deltaY > 10) return;
+    
+    // Ignore interactive UI components
+    const isInteractive = e.target.closest('button, a, input, textarea, select, option, label, [role="button"], [role="link"], [onclick]');
+    if (isInteractive) return;
+    
+    const now = Date.now();
+    // Keep only taps within the last 800ms
+    tapTimestamps = tapTimestamps.filter(t => now - t <= 800);
+    tapTimestamps.push(now);
+    
+    if (tapTimestamps.length === 3) {
+      showCuteEffectThenRedirect();
+      tapTimestamps = []; // reset
+    }
+  }, { passive: true });
+}
 
 function showCuteEffectThenRedirect() {
   // Create hearts floating effect
